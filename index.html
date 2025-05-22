@@ -105,8 +105,39 @@
       }
     }
   </style>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCadxCbqsfUSLwOulXvS_j-Bg-GBPpUyxY",
+      authDomain: "sonkkurak-game.firebaseapp.com",
+      databaseURL: "https://sonkkurak-game-default-rtdb.firebaseio.com",
+      projectId: "sonkkurak-game",
+      storageBucket: "sonkkurak-game.appspot.com",
+      messagingSenderId: "990855523021",
+      appId: "1:990855523021:web:b42222a0f4fd5782735784"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    function saveScore(name, grade, cls, score) {
+      const userKey = `${grade}_${cls}_${name}`;
+      const masked = name.length <= 2 ? name.charAt(0) + '*' : name.charAt(0) + '*' + name.charAt(name.length - 1);
+      const now = new Date();
+      const lastPlayed = now.toLocaleString(); // 지역 시간으로 마지막 참여 시간
+
+      database.ref("scores/" + userKey).set({
+        name: masked,
+        grade,
+        class: cls,
+        score,
+        lastPlayed
+      });
+    }
+  </script>
 </head>
 <body>
+  <!-- 이하 내용 동일 (생략) -->
 
   <h1>손꾸락 대전</h1>
   <div id="userInfo">
