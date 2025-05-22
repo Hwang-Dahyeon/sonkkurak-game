@@ -12,22 +12,18 @@
       margin: 0;
       padding: 0;
     }
-
     h1 {
       margin-top: 30px;
       font-size: 2em;
     }
-
     #userInfo, #game {
       margin-top: 30px;
     }
-
     select, input[type="text"] {
       padding: 8px;
       font-size: 14px;
       margin: 5px;
     }
-
     button {
       font-size: 14px;
       padding: 10px 20px;
@@ -37,11 +33,9 @@
       color: white;
       cursor: pointer;
     }
-
     button:hover {
       background-color: #2980b9;
     }
-
     #coinButton {
       width: 120px;
       height: 120px;
@@ -57,16 +51,13 @@
                   2px 2px 5px rgba(0, 0, 0, 0.3);
       transition: transform 0.1s ease;
     }
-
     #coinButton:active {
       transform: scale(0.95);
     }
-
     #score {
       font-size: 20px;
       font-weight: bold;
     }
-
     #showRankingButton {
       position: absolute;
       top: 10px;
@@ -81,22 +72,19 @@
       box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
       transition: background-color 0.2s ease;
     }
-
     #showRankingButton:hover {
       background-color: #d4ac0d;
     }
-
     #ranking {
       margin-top: 20px;
       background-color: white;
       border: 1px solid #ccc;
       border-radius: 8px;
       padding: 15px;
-      width: 300px;
+      width: 320px;
       margin-left: auto;
       margin-right: auto;
     }
-
     #ranking h3 {
       margin: 10px 0 5px;
     }
@@ -104,7 +92,6 @@
 </head>
 <body>
   <h1>손꾸락 대전</h1>
-
   <div id="userInfo">
     <label for="grade">학년: </label>
     <select id="grade">
@@ -113,7 +100,6 @@
       <option value="2">2학년</option>
       <option value="3">3학년</option>
     </select><br/>
-
     <label for="class">반: </label>
     <select id="class">
       <option value="" disabled selected>반 선택</option>
@@ -124,21 +110,19 @@
       <option value="5">5반</option>
       <option value="6">6반</option>
     </select><br/>
-
     <label for="name">이름: </label>
     <input type="text" id="name" placeholder="이름 입력"><br/>
-
     <button id="startButton">게임 시작</button>
   </div>
-
   <div id="game" style="display: none; position: relative;">
     <button id="coinButton">클릭!</button>
     <p>코인 획득: <span id="score">0</span></p>
     <button id="showRankingButton">랭킹 보기</button>
-
     <div id="ranking" style="display: none;">
       <h3>전체 랭킹</h3>
       <div id="individualRanking"></div>
+      <h3>반별 랭킹</h3>
+      <div id="classRanking"></div>
     </div>
   </div>
 
@@ -153,18 +137,14 @@
       storageBucket: "sonkkurak-game.appspot.com",
       messagingSenderId: "990855523021",
       appId: "1:990855523021:web:b42222a0f4fd5782735784",
-      measurementId: "G-EDS8HSWW51",
       databaseURL: "https://sonkkurak-game-default-rtdb.firebaseio.com/"
     };
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
   </script>
-
   <script>
     let score = 0;
-    let userName = '';
-    let userGrade = '';
-    let userClass = '';
+    let userName = '', userGrade = '', userClass = '';
 
     const coinButton = document.getElementById('coinButton');
     const scoreDisplay = document.getElementById('score');
@@ -177,30 +157,24 @@
     const showRankingButton = document.getElementById('showRankingButton');
     const rankingDiv = document.getElementById('ranking');
     const individualRankingDiv = document.getElementById('individualRanking');
+    const classRankingDiv = document.getElementById('classRanking');
 
     function maskName(name) {
-      const length = name.length;
-      if (length <= 2) return name.charAt(0) + '*';
-      return name.charAt(0) + '*' + name.charAt(length - 1);
+      return name.length <= 2 ? name.charAt(0) + '*' : name.charAt(0) + '*' + name.charAt(name.length - 1);
     }
 
     function saveScore(name, grade, cls, score) {
       const masked = maskName(name);
       const userKey = `${grade}_${cls}_${name}`;
       database.ref("scores/" + userKey).set({
-        name: masked,
-        grade,
-        class: cls,
-        score,
-        timestamp: Date.now()
+        name: masked, grade, class: cls, score, timestamp: Date.now()
       });
     }
 
     function loadScores(callback) {
       database.ref("scores").once("value", (snapshot) => {
         const data = snapshot.val();
-        const result = data ? Object.values(data) : [];
-        callback(result);
+        callback(data ? Object.values(data) : []);
       });
     }
 
@@ -210,32 +184,62 @@
       userName = nameInput.value.trim();
 
       if (userGrade && userClass && userName !== '') {
-        userInfoDiv.style.display = 'none';
-        gameDiv.style.display = 'block';
-        alert(`${userGrade}학년 ${userClass}반 ${maskName(userName)}님, 게임 시작!`);
+        const userKey = `${userGrade}_${userClass}_${userName}`;
+        database.ref("scores/" + userKey).once("value", snapshot => {
+          const data = snapshot.val();
+          score = data && data.score ? data.score : 0;
+          scoreDisplay.textContent = score;
+          userInfoDiv.style.display = 'none';
+          gameDiv.style.display = 'block';
+          alert(`${userGrade}학년 ${userClass}반 ${maskName(userName)}님, 게임 시작! (현재: ${score}코인)`);
+        });
       } else {
         alert('학년, 반, 이름을 모두 입력해주세요.');
       }
     });
 
-    coinButton.addEventListener('click', function () {
+    coinButton.addEventListener('click', () => {
       score += 1;
       scoreDisplay.textContent = score;
     });
 
-    showRankingButton.addEventListener('click', function () {
-      rankingDiv.style.display = (rankingDiv.style.display === 'none') ? 'block' : 'none';
-
+    showRankingButton.addEventListener('click', () => {
+      rankingDiv.style.display = rankingDiv.style.display === 'none' ? 'block' : 'none';
       if (rankingDiv.style.display === 'block') {
         saveScore(userName, userGrade, userClass, score);
 
-        loadScores((allScores) => {
+        loadScores(allScores => {
+          // 개인 랭킹 출력
           const sorted = allScores.sort((a, b) => b.score - a.score);
           let html = '';
           sorted.slice(0, 5).forEach((entry, i) => {
             html += `<p>${i + 1}위 ${entry.name} (${entry.grade}-${entry.class}) - ${entry.score}코인</p>`;
           });
           individualRankingDiv.innerHTML = html;
+
+          // 반별 랭킹 계산
+          const classGroups = {};
+          allScores.forEach(entry => {
+            const key = `${entry.grade}-${entry.class}`;
+            if (!classGroups[key]) classGroups[key] = [];
+            classGroups[key].push(entry);
+          });
+
+          const classAvgList = Object.entries(classGroups).map(([key, list]) => {
+            const total = list.reduce((sum, x) => sum + x.score, 0);
+            const avg = total / list.length;
+            return { key, avg, count: list.length };
+          }).sort((a, b) => b.avg - a.avg);
+
+          let classHtml = '';
+          classAvgList.forEach((entry, i) => {
+            const myKey = `${userGrade}-${userClass}`;
+            const isMine = entry.key === myKey;
+            classHtml += `<p>${i + 1}위 ${entry.key} 평균 ${entry.avg.toFixed(1)}코인 (${entry.count}명)`;
+            if (isMine) classHtml += ` ← 내 반!`;
+            classHtml += `</p>`;
+          });
+          classRankingDiv.innerHTML = classHtml;
         });
       }
     });
