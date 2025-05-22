@@ -142,7 +142,7 @@
     </div>
   </div>
 
-  <!-- Firebase SDK 추가 -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
   <script>
@@ -150,13 +150,12 @@
       apiKey: "AIzaSyCadxCbqsfUSLwOulXvS_j-Bg-GBPpUyxY",
       authDomain: "sonkkurak-game.firebaseapp.com",
       projectId: "sonkkurak-game",
-      storageBucket: "sonkkurak-game.firebasestorage.app",
+      storageBucket: "sonkkurak-game.appspot.com",
       messagingSenderId: "990855523021",
       appId: "1:990855523021:web:b42222a0f4fd5782735784",
       measurementId: "G-EDS8HSWW51",
       databaseURL: "https://sonkkurak-game-default-rtdb.firebaseio.com/"
     };
-
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
   </script>
@@ -187,7 +186,8 @@
 
     function saveScore(name, grade, cls, score) {
       const masked = maskName(name);
-      database.ref("scores").push({
+      const userKey = `${grade}_${cls}_${name}`;
+      database.ref("scores/" + userKey).set({
         name: masked,
         grade,
         class: cls,
@@ -198,11 +198,9 @@
 
     function loadScores(callback) {
       database.ref("scores").once("value", (snapshot) => {
-        const data = [];
-        snapshot.forEach((child) => {
-          data.push(child.val());
-        });
-        callback(data);
+        const data = snapshot.val();
+        const result = data ? Object.values(data) : [];
+        callback(result);
       });
     }
 
