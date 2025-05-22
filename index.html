@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>손꾸락 대전</title>
+  <style>
+    body {
+      font-family: 'Pretendard', sans-serif;
+      text-align: center;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      margin-top: 30px;
+      font-size: 2em;
+    }
+
+    #userInfo, #game {
+      margin-top: 30px;
+    }
+
+    select, input[type="text"] {
+      padding: 8px;
+      font-size: 14px;
+      margin: 5px;
+    }
+
+    button {
+      font-size: 14px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      background-color: #3498db;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    /* ✅ 코인 클릭 버튼 (노란색 원형) */
+    #coinButton {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background-color: #f1c40f;
+      font-size: 18px;
+      font-weight: bold;
+      color: black;
+      border: 4px solid #e1b900;
+      cursor: pointer;
+      box-shadow: inset -4px -4px 10px rgba(255, 255, 255, 0.4),
+                  inset 4px 4px 10px rgba(0, 0, 0, 0.2),
+                  2px 2px 5px rgba(0, 0, 0, 0.3);
+      transition: transform 0.1s ease;
+    }
+
+    #coinButton:active {
+      transform: scale(0.95);
+    }
+
+    #score {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    /* 랭킹 보기 버튼 (작고 깔끔한 사각형) */
+    #showRankingButton {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 6px 12px;
+      font-size: 14px;
+      background-color: #f1c40f;
+      color: black;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
+      transition: background-color 0.2s ease;
+    }
+
+    #showRankingButton:hover {
+      background-color: #d4ac0d;
+    }
+
+    #ranking {
+      margin-top: 20px;
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 15px;
+      width: 300px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    #ranking h3 {
+      margin: 10px 0 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>손꾸락 대전</h1>
+
+  <!-- 학년, 반, 이름 입력 폼 -->
+  <div id="userInfo">
+    <label for="grade">학년: </label>
+    <select id="grade">
+      <option value="" disabled selected>학년 선택</option>
+      <option value="1">1학년</option>
+      <option value="2">2학년</option>
+      <option value="3">3학년</option>
+    </select><br/>
+
+    <label for="class">반: </label>
+    <select id="class">
+      <option value="" disabled selected>반 선택</option>
+      <option value="1">1반</option>
+      <option value="2">2반</option>
+      <option value="3">3반</option>
+      <option value="4">4반</option>
+      <option value="5">5반</option>
+      <option value="6">6반</option>
+    </select><br/>
+
+    <label for="name">이름: </label>
+    <input type="text" id="name" placeholder="이름 입력"><br/>
+
+    <button id="startButton">게임 시작</button>
+  </div>
+
+  <!-- 게임 영역 -->
+  <div id="game" style="display: none; position: relative;">
+    <button id="coinButton">클릭!</button>
+    <p>코인 획득: <span id="score">0</span></p>
+    <button id="showRankingButton">랭킹 보기</button>
+
+    <div id="ranking" style="display: none;">
+      <h3>반 랭킹</h3>
+      <div id="classRanking"></div>
+
+      <h3>개인 랭킹</h3>
+      <div id="individualRanking"></div>
+    </div>
+  </div>
+
+  <script>
+    let score = 0;
+    let userName = '';
+    let userGrade = '';
+    let userClass = '';
+
+    const coinButton = document.getElementById('coinButton');
+    const scoreDisplay = document.getElementById('score');
+    const startButton = document.getElementById('startButton');
+    const gradeInput = document.getElementById('grade');
+    const classInput = document.getElementById('class');
+    const nameInput = document.getElementById('name');
+    const userInfoDiv = document.getElementById('userInfo');
+    const gameDiv = document.getElementById('game');
+    const showRankingButton = document.getElementById('showRankingButton');
+    const rankingDiv = document.getElementById('ranking');
+    const individualRankingDiv = document.getElementById('individualRanking');
+    const classRankingDiv = document.getElementById('classRanking');
+
+    function maskName(name) {
+      const length = name.length;
+      if (length <= 2) return name.charAt(0) + '*';
+      return name.charAt(0) + '*' + name.charAt(length - 1);
+    }
+
+    startButton.addEventListener('click', function () {
+      userGrade = gradeInput.value;
+      userClass = classInput.value;
+      userName = nameInput.value.trim();
+
+      if (userGrade && userClass && userName !== '') {
+        userInfoDiv.style.display = 'none';
+        gameDiv.style.display = 'block';
+        alert(`${userGrade}학년 ${userClass}반 ${maskName(userName)}님, 게임 시작!`);
+      } else {
+        alert('학년, 반, 이름을 모두 입력해주세요.');
+      }
+    });
+
+    coinButton.addEventListener('click', function () {
+      score += 1;
+      scoreDisplay.textContent = score;
+    });
+
+    showRankingButton.addEventListener('click', function () {
+      if (rankingDiv.style.display === 'none') {
+        rankingDiv.style.display = 'block';
+
+        // 샘플 데이터 (나중에 Firebase로 연결할 부분)
+        classRankingDiv.innerHTML = `
+          <p>1위: 3학년 2반 - 1200코인</p>
+          <p>2위: 2학년 4반 - 1100코인</p>
+          <p>3위: 1학년 6반 - 950코인</p>
+        `;
+
+        individualRankingDiv.innerHTML = `
+          <p>${maskName(userName)} - ${score}코인</p>
+          <p>이*영 - 400코인</p>
+          <p>박*수 - 350코인</p>
+        `;
+      } else {
+        rankingDiv.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
