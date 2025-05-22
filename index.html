@@ -9,8 +9,9 @@
       font-family: 'Pretendard', sans-serif;
       text-align: center;
       background-color: #f9f9f9;
-      margin: 0;
-      padding: 0;
+      margin: 0 auto;
+      padding: 1rem;
+      max-width: 600px;
     }
     h1 {
       margin-top: 30px;
@@ -23,6 +24,8 @@
       padding: 8px;
       font-size: 14px;
       margin: 5px;
+      width: 80%;
+      max-width: 250px;
     }
     button {
       font-size: 14px;
@@ -81,16 +84,30 @@
       border: 1px solid #ccc;
       border-radius: 8px;
       padding: 15px;
-      width: 320px;
+      width: 100%;
+      max-width: 400px;
       margin-left: auto;
       margin-right: auto;
     }
     #ranking h3 {
       margin: 10px 0 5px;
     }
+    @media (max-width: 480px) {
+      #coinButton {
+        width: 90px;
+        height: 90px;
+        font-size: 16px;
+        border-width: 3px;
+      }
+      button {
+        font-size: 12px;
+        padding: 8px 16px;
+      }
+    }
   </style>
 </head>
 <body>
+
   <h1>손꾸락 대전</h1>
   <div id="userInfo">
     <label for="grade">학년: </label>
