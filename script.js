@@ -21,39 +21,45 @@
     const userInfoDiv = document.getElementById('userInfo');
     const gameDiv = document.getElementById('game');
 
+    // 패턴 기반 오토마우스 감지 함수
     function detectAutoClicker(now) {
-      clickTimestamps.push(now);
-      if (clickTimestamps.length > 10) clickTimestamps.shift();
+        clickTimestamps.push(now);
+        if (clickTimestamps.length > 10) clickTimestamps.shift();
 
-      const intervals = clickTimestamps.slice(1).map((time, i) => time - clickTimestamps[i]);
-      const allSame = intervals.every(v => v === intervals[0]);
-      const allTooFast = intervals.every(v => v < 80);
+        if (clickTimestamps.length < 10) return; // 아직 데이터 부족
 
-      if (allSame || allTooFast) {
-        suspiciousClicks++;
-        if (suspiciousClicks >= maxSuspiciousClicks) {
-          alert("경고 누적! 기존의 데이터를 모두 삭제하고 사이트에서 퇴장 조치합니다.");
-          if (userGrade && userClass && userName) {
-            const userKey = `${userGrade}_${userClass}_${userName}`;
-            firebase.database().ref("scores/" + userKey).remove();
-          }
-          window.location.href = "https://google.com";
+        const intervals = clickTimestamps.slice(1).map((time, i) => time - clickTimestamps[i]);
+
+        const avg = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+        const stdDev = Math.sqrt(intervals.reduce((a, b) => a + Math.pow(b - avg, 2), 0) / intervals.length);
+
+        const isFast = avg < 120;
+        const isConsistent = stdDev < 10;
+
+        if (isFast && isConsistent) {
+            suspiciousClicks++;
+            if (suspiciousClicks >= maxSuspiciousClicks) {
+                alert("경고 누적! 기존의 데이터를 모두 삭제하고 사이트에서 퇴장 조치합니다.");
+                if (userGrade && userClass && userName) {
+                    const userKey = `${userGrade}_${userClass}_${userName}`;
+                    firebase.database().ref("scores/" + userKey).remove();
+                }
+                window.location.href = "https://google.com";
+            } else {
+                alert(`⚠️ 경고! 너무 빠르고 일정한 클릭 패턴이 감지되었습니다.\n오토마우스 의심 ${suspiciousClicks}/${maxSuspiciousClicks}`);
+            }
         } else {
-          alert(`⚠️ 경고! 비정상적인 행동이 감지 되었습니다.\n오토마우스 감지 ${suspiciousClicks}/${maxSuspiciousClicks}`);
+            suspiciousClicks = 0;
         }
-      } else {
-        suspiciousClicks = 0;
-      }
     }
 
-    // 학년, 반 이름 입력받고 게임 시작
-    startButton.addEventListener('click', function() {
+    // 학년, 반, 이름 입력받고 게임 시작
+    startButton.addEventListener('click', function () {
         userGrade = gradeInput.value;
         userClass = classInput.value;
         userName = nameInput.value.trim();
 
         if (userGrade && userClass && userName) {
-            // 정보 저장 (오토마우스 감지 시 활용)
             localStorage.setItem('userGrade', userGrade);
             localStorage.setItem('userClass', userClass);
             localStorage.setItem('userName', userName);
@@ -66,10 +72,9 @@
         }
     });
 
-    // 코인 클릭 시 점수 증가 + 오토마우스 감지
-    coinButton.addEventListener('click', function() {
+    // 코인 클릭 시 점수 증가 및 오토마우스 감지
+    coinButton.addEventListener('click', function () {
         const now = Date.now();
-        if (now - lastClickTime < 100) return;
         lastClickTime = now;
         detectAutoClicker(now);
 
