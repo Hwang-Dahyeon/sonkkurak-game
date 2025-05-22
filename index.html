@@ -42,7 +42,6 @@
       background-color: #2980b9;
     }
 
-    /* ✅ 코인 클릭 버튼 (노란색 원형) */
     #coinButton {
       width: 120px;
       height: 120px;
@@ -68,7 +67,6 @@
       font-weight: bold;
     }
 
-    /* 랭킹 보기 버튼 (작고 깔끔한 사각형) */
     #showRankingButton {
       position: absolute;
       top: 10px;
@@ -107,7 +105,6 @@
 <body>
   <h1>손꾸락 대전</h1>
 
-  <!-- 학년, 반, 이름 입력 폼 -->
   <div id="userInfo">
     <label for="grade">학년: </label>
     <select id="grade">
@@ -134,20 +131,35 @@
     <button id="startButton">게임 시작</button>
   </div>
 
-  <!-- 게임 영역 -->
   <div id="game" style="display: none; position: relative;">
     <button id="coinButton">클릭!</button>
     <p>코인 획득: <span id="score">0</span></p>
     <button id="showRankingButton">랭킹 보기</button>
 
     <div id="ranking" style="display: none;">
-      <h3>반 랭킹</h3>
-      <div id="classRanking"></div>
-
-      <h3>개인 랭킹</h3>
+      <h3>전체 랭킹</h3>
       <div id="individualRanking"></div>
     </div>
   </div>
+
+  <!-- Firebase SDK 추가 -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCadxCbqsfUSLwOulXvS_j-Bg-GBPpUyxY",
+      authDomain: "sonkkurak-game.firebaseapp.com",
+      projectId: "sonkkurak-game",
+      storageBucket: "sonkkurak-game.firebasestorage.app",
+      messagingSenderId: "990855523021",
+      appId: "1:990855523021:web:b42222a0f4fd5782735784",
+      measurementId: "G-EDS8HSWW51",
+      databaseURL: "https://sonkkurak-game-default-rtdb.firebaseio.com/"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+  </script>
 
   <script>
     let score = 0;
@@ -166,12 +178,32 @@
     const showRankingButton = document.getElementById('showRankingButton');
     const rankingDiv = document.getElementById('ranking');
     const individualRankingDiv = document.getElementById('individualRanking');
-    const classRankingDiv = document.getElementById('classRanking');
 
     function maskName(name) {
       const length = name.length;
       if (length <= 2) return name.charAt(0) + '*';
       return name.charAt(0) + '*' + name.charAt(length - 1);
+    }
+
+    function saveScore(name, grade, cls, score) {
+      const masked = maskName(name);
+      database.ref("scores").push({
+        name: masked,
+        grade,
+        class: cls,
+        score,
+        timestamp: Date.now()
+      });
+    }
+
+    function loadScores(callback) {
+      database.ref("scores").once("value", (snapshot) => {
+        const data = [];
+        snapshot.forEach((child) => {
+          data.push(child.val());
+        });
+        callback(data);
+      });
     }
 
     startButton.addEventListener('click', function () {
@@ -194,23 +226,19 @@
     });
 
     showRankingButton.addEventListener('click', function () {
-      if (rankingDiv.style.display === 'none') {
-        rankingDiv.style.display = 'block';
+      rankingDiv.style.display = (rankingDiv.style.display === 'none') ? 'block' : 'none';
 
-        // 샘플 데이터 (나중에 Firebase로 연결할 부분)
-        classRankingDiv.innerHTML = `
-          <p>1위: 3학년 2반 - 1200코인</p>
-          <p>2위: 2학년 4반 - 1100코인</p>
-          <p>3위: 1학년 6반 - 950코인</p>
-        `;
+      if (rankingDiv.style.display === 'block') {
+        saveScore(userName, userGrade, userClass, score);
 
-        individualRankingDiv.innerHTML = `
-          <p>${maskName(userName)} - ${score}코인</p>
-          <p>이*영 - 400코인</p>
-          <p>박*수 - 350코인</p>
-        `;
-      } else {
-        rankingDiv.style.display = 'none';
+        loadScores((allScores) => {
+          const sorted = allScores.sort((a, b) => b.score - a.score);
+          let html = '';
+          sorted.slice(0, 5).forEach((entry, i) => {
+            html += `<p>${i + 1}위 ${entry.name} (${entry.grade}-${entry.class}) - ${entry.score}코인</p>`;
+          });
+          individualRankingDiv.innerHTML = html;
+        });
       }
     });
   </script>
