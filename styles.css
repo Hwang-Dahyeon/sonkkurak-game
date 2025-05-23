@@ -1,50 +1,72 @@
 /* 전체 페이지 스타일 */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
-    text-align: center;
     margin: 0;
     padding: 0;
+    background-color: #f0f0f0;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* 화면 전체 높이 */
 }
 
 /* 게임 영역 스타일 */
 #game {
-    margin: 50px auto;
-    padding: 20px;
-    background-color: #fff;
+    background-color: #ffffff;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-width: 600px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    text-align: center;
     width: 90%;
+    max-width: 600px;
 }
 
 /* 반응형 원형 버튼 스타일 */
 button {
-    width: 20vw;              /* 화면 너비의 20% */
-    height: 20vw;             /* 정사각형 → 원형 만들기 */
-    max-width: 150px;         /* 최대 크기 제한 */
-    max-height: 150px;
-    min-width: 80px;          /* 최소 크기 제한 */
-    min-height: 80px;
-    border-radius: 50%;       /* 원형 버튼 */
+    width: clamp(80px, 20vw, 150px);
+    height: clamp(80px, 20vw, 150px);
+    border-radius: 50%;
     background-color: #ffcc00;
     border: none;
-    font-size: 4vw;           /* 글자 크기도 비례 */
-    max-font-size: 24px;
+    font-size: clamp(16px, 4vw, 24px);
     color: white;
     font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s, transform 0.2s;
     margin: 20px auto;
     display: block;
 }
 
 button:hover {
-    background-color: #ff9900; /* hover 시 색 변화 */
+    background-color: #ff9900;
+    transform: scale(1.05);
 }
 
 /* 점수 및 랭킹 텍스트 스타일 */
 p {
     font-size: 18px;
     margin-top: 10px;
+}
+
+/* 🌙 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #1e1e1e;
+        color: #f0f0f0;
+    }
+
+    #game {
+        background-color: #2c2c2c;
+        box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05);
+    }
+
+    button {
+        background-color: #ffaa00;
+        color: #1e1e1e;
+    }
+
+    button:hover {
+        background-color: #cc8500;
+    }
 }
