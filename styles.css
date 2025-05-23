@@ -1,50 +1,83 @@
-/* 전체 페이지 스타일 */
-body {
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>중앙 버튼 게임</title>
+<style>
+  /* 전체 페이지 스타일 */
+  body {
     font-family: Arial, sans-serif;
     background-color: #f0f0f0;
-    text-align: center;
     margin: 0;
     padding: 0;
-}
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center; /* 수평 중앙 */
+    align-items: center;     /* 수직 중앙 */
+  }
 
-/* 게임 영역 스타일 */
-#game {
-    margin: 50px auto;
-    padding: 20px;
+  /* 게임 영역 스타일 */
+  #game {
     background-color: #fff;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    /* 최대 너비 유지 */
     max-width: 600px;
-    width: 90%;
-}
+    width: 90vw; /* 반응형 */
+    /* flex container이 아닌 일반 박스 형태 유지 */
+    /* 중앙 정렬은 body에서 처리 */
+  }
 
-/* 반응형 원형 버튼 스타일 */
-button {
-    width: 20vw;              /* 화면 너비의 20% */
-    height: 20vw;             /* 정사각형 → 원형 만들기 */
-    max-width: 150px;         /* 최대 크기 제한 */
+  /* 반응형 원형 버튼 스타일 */
+  button {
+    width: 30vmin;           /* 가로세로 중 작은 쪽 기준 크기 */
+    height: 30vmin;
+    max-width: 150px;
     max-height: 150px;
-    min-width: 80px;          /* 최소 크기 제한 */
+    min-width: 80px;
     min-height: 80px;
-    border-radius: 50%;       /* 원형 버튼 */
+    border-radius: 50%;      /* 원형 버튼 */
     background-color: #ffcc00;
     border: none;
-    font-size: 4vw;           /* 글자 크기도 비례 */
+    font-size: 5vmin;        /* 글자 크기 비례 */
     max-font-size: 24px;
     color: white;
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.3s;
-    margin: 20px auto;
     display: block;
-}
+    margin: 0 auto;          /* 수평 중앙 */
+  }
 
-button:hover {
-    background-color: #ff9900; /* hover 시 색 변화 */
-}
+  button:hover {
+    background-color: #ff9900;
+  }
 
-/* 점수 및 랭킹 텍스트 스타일 */
-p {
+  /* 점수 및 랭킹 텍스트 스타일 */
+  p {
     font-size: 18px;
     margin-top: 10px;
-}
+  }
+</style>
+</head>
+<body>
+  <div id="game">
+    <button id="coinButton">Click!</button>
+    <p id="score">Score: 0</p>
+  </div>
+
+  <script>
+    const coinButton = document.getElementById('coinButton');
+    const scoreDisplay = document.getElementById('score');
+    let score = 0;
+
+    coinButton.addEventListener('click', () => {
+      score++;
+      scoreDisplay.textContent = `Score: ${score}`;
+    });
+  </script>
+</body>
+</html>
